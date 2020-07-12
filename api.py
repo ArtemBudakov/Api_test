@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
+import psycopg2
+import dbconf
+import re
 
 app = Flask(__name__)
 
-'''main url address'''
 
-
-@app.route('/')
+@app.route('/')  # main url address
 def main():
     return 'Hello world in "/" directory '
 
@@ -16,10 +17,47 @@ def api_get():
 
 
 @app.route('/api/image/resize', methods=['POST'])  # url address for loading image for resize
-def get_image():
-    return '<h1>This is "/api/image/resize"</h1>'
+def upload_image():
+    identificator = insert()
+    return jsonify(identificator)
 
 
 @app.route('/api/status', methods=['GET'])  # url address for asking status of resizing by identificator
 def get_status():
-    return '<h1>This is "/api/status"</h1>'
+    if 'id' in request.args:
+        id = int(request.args['id'])
+    else:
+        return "Error: No id field provided. Please specify an id."
+
+    conn = dbconf.connection_db()  # connection string for connect to DB
+
+    curs = conn.cursor()
+    query_status = f"SELECT status FROM status WHERE id = {id}"
+    curs.execute(query_status)
+    status_value = curs.fetchone()
+
+    conn.close()
+
+    if status_value is None:
+        return "Error: the entered identifier does not exist"
+    status_value = re.sub("[\W\d_]", "", str(status_value))
+    return jsonify(status_value)
+
+
+def insert():
+    status = ("success", "processing", "failed")
+
+    conn = dbconf.connection_db()  # connection string for connect to DB
+
+    curs = conn.cursor()
+    query_insert = f"INSERT INTO status (status) VALUES ('{status[1]}') "
+    curs.execute(query_insert)
+
+    conn.commit()
+    query_last_value = "SELECT id FROM status ORDER BY id DESC LIMIT 1"
+    curs.execute(query_last_value)
+    last_value = curs.fetchone()
+
+    conn.close()
+    last_value = re.sub("\D", "", str(last_value))
+    return last_value
