@@ -17,9 +17,9 @@ def api_get():
 
 @app.route('/api/image/resize', methods=['POST'])  # url address for loading image for resize
 def get_image():
-    pass
+    return '<h1>This is "/api/image/resize"</h1>'
 
 
 @app.route('/api/status', methods=['GET'])  # url address for asking status of resizing by identificator
 def get_status():
-    pass
+    return '<h1>This is "/api/status"</h1>'
