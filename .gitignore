@@ -1,7 +1,13 @@
+# folder with pictures
+pictures/
+
+# information about connection to database
+dbconf.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
+*$py.classf
 
 # C extensions
 *.so
